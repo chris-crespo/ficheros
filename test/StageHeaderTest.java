@@ -9,8 +9,8 @@ public class StageHeaderTest {
 
         var header = StageHeader.parse(str);
 
-        Assert.assertEquals(expected.code, header.code);
-        Assert.assertEquals(expected.rec, header.rec);
-        Assert.assertEquals(expected.distance, header.distance);
+        Assert.assertEquals(expected.code(), header.code());
+        Assert.assertEquals(expected.tour(), header.tour());
+        Assert.assertEquals(expected.distance(), header.distance());
     }
 }

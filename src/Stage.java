@@ -3,17 +3,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class Stage {
-    public final Integer code;
-    public final LocalTime startTime;
-    public final List<Line> lines; 
-
-    public Stage(Integer code, LocalTime startTime, List<Line> lines) {
-        this.code = code;
-        this.startTime = startTime;
-        this.lines = lines;
-    }
-
+public record Stage(int code, LocalTime startTime, List<Race> races) {
     public static Stage parse(List<String> lines) {
         var header = StageHeader.parse(lines.get(0));
         // Nos saltamos la cabecera de la etapa y de la salida
@@ -25,12 +15,6 @@ public class Stage {
             .dropWhile(str -> Character.isDigit(str.charAt(0)))
             .collect(Collectors.toList());
 
-        rest.stream()
-            .reduce(Pair::new, (Pair<List<List<String>>, List<String>> acc, String str) -> {
-                if (Character.isAlphabetic(str.charAt(0))) {
-                    acc.first
-                }
-            });
-
+        var races = new ArrayList<Race>();
     }
 }

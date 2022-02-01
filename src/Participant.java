@@ -1,17 +1,4 @@
-
-public class Participant {
-    public final Integer code;
-    public final String name;
-    public final String countryCode;
-    public final String x; // TODO: rename this
-
-    public Participant(Integer code, String name, String countryCode, String x) {
-        this.code = code;
-        this.name = name;
-        this.countryCode = countryCode;
-        this.x = x;
-    }
-
+public record Participant(int code, String name, String countryCode, String x){
     public static Participant parse(String str) {
         var fields = str.split(", ");
         
