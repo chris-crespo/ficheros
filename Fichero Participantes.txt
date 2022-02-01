@@ -1,0 +1,19 @@
+10, Primoz Roglic, (SLO), Jumbo-Visma
+11, Robert Gesink, (NED), Jumbo-Visma
+12, Lennard Hofstede, (NED), Jumbo-Visma
+20, Egan Bernal, (COL), Ineos Grenadiers
+21, Adam Yates, (GBR), Ineos Grenadiers
+22, Pavel Sivakov, (RUS), Ineos Grenadiers
+30, Omar Fraile, (ESP), Astana-Premier Tech
+31, Oscar Rodriguez, (ESP), Astana-Premier Tech
+32, Yuriy Natarov, (KAZ), Astana-Premier Tech
+40, Enric Max, (ESP), Movistar
+41, Nelson Oliveira, (POR), Movistar
+42, Johan Jacobs, (SUI), Movistar
+50, Guillaume Martin, (FRA), Cofidis
+51, Emmanuel Morin, (FRA), Cofidis
+52, Eddy Fine, (FRA), Cofidis
+60, Mikel Bizkarra, (ESP), Euskaltel-Euskadi
+61, Gotzon Martin, (ESP), Euskaltel-Euskadi
+62, Mikel Bizkarra, (ESP), Euskaltel-Euskadi
+ 

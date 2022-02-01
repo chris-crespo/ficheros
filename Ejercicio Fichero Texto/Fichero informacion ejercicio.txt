@@ -1,0 +1,27 @@
+Información para ejercicio
+
+Puntos por meta volante
+-----------------------
+Primero en pasar:   5 puntos
+Segundo.........:   3 puntos
+Tercero.........:   1 punto
+
+Puntos montaña
+---------------
+3ª Categoria:
+Primero en pasar:   5 puntos
+Segundo.........:   3 puntos
+Tercero.........:   1 punto
+
+2ª Categoria:
+Primero en pasar:  10 puntos
+Segundo.........:   5 puntos
+Tercero.........:   3 puntos
+
+1ª Categoria:
+Primero en pasar:  20 puntos
+Segundo.........:  15 puntos
+Tercero.........:  10 puntos
+Cuarto..........:   5 puntos
+
+
