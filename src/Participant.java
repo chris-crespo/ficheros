@@ -1,4 +1,4 @@
-public record Participant(int code, String name, String countryCode, String x){
+public record Participant(int code, String name, String countryCode, String team){
     public static Participant parse(String str) {
         var fields = str.split(", ");
         
@@ -13,6 +13,6 @@ public record Participant(int code, String name, String countryCode, String x){
     public String toString() {
         return String.format(
             "{ code: %d, name: %s, countryCode: %s, x: %s }", 
-            code, name, countryCode, x);
+            code, name, countryCode, team);
     }
 }

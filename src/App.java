@@ -1,40 +1,21 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
-import java.util.Scanner;
-import java.util.function.Consumer;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class App {
-    private static void callWithReader(String filename, Consumer<Scanner> proc) {
-        var file = new File(filename);
-
-        try {
-            var reader = new Scanner(file);
-            proc.accept(reader);
-            reader.close();
-        }
-        catch (FileNotFoundException e) {
-            System.out.println("Could not open " + file.getName());
-            System.exit(1);
-        }
-    }
-
     private static List<String> readFile(String filename) {
-        var lines = new ArrayList<String>();
-        callWithReader(filename, reader -> {
-            while (reader.hasNextLine()) {
-                var line = reader.nextLine();
-                if (line.strip().isEmpty())
-                    continue;
+        try {
+            return Files.lines(Path.of(filename))
+                .filter(line -> !line.strip().isEmpty())
+                .collect(Collectors.toList());
+        }
+        catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
 
-                lines.add(line);
-            }
-        });
-
-        return lines;
+        return null;
     }
 
     private static List<Participant> readParticipants(String filename) {
@@ -45,12 +26,15 @@ public class App {
 
     private static Stage readStage(String filename) {
         var fileContent = readFile(filename);
-        var header = StageHeader.parse(fileContent.get(0));
-        //var lines = parseLines(fileContent.stream().skip(1).collect(Collectors.toList()));
-        return null;
+        return Stage.parse(fileContent);
     }
 
     public static void main(String[] args) throws Exception {
-
+        readParticipants("Fichero Participantes.txt");
+        var stage = readStage("Ejercicio Fichero Texto/Fichero Etapa 1.txt");
+        stage.races().forEach(race -> {
+            System.out.println("Race => " + race.destination() + " " + race.distance());
+            race.times().forEach(time -> System.out.println("Time => " + time));
+        });
     }
 }

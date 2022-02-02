@@ -3,7 +3,7 @@ import org.junit.Test;
 
 public class StageHeaderTest {
     @Test    
-    public void parsesStage() {
+    public void parsesStageHeader() {
         var str = "Etapa 2 - X / Y - 200 km";
         var expected = new StageHeader(2, "X / Y", "200 km");
 
