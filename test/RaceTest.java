@@ -1,5 +1,5 @@
-import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -13,14 +13,18 @@ public class RaceTest {
         lines.add("18, 10:40:20");
         lines.add("40, 10:40:20");
 
-        var expectedLines = new ArrayList<Pair<Integer, LocalTime>>();
-        var time = LocalTime.parse("10:40:20");
-        expectedLines.add(new Pair<Integer, LocalTime>(10, time));
-        expectedLines.add(new Pair<Integer, LocalTime>(18, time));
-        expectedLines.add(new Pair<Integer, LocalTime>(40, time));
-        var expected = new BonusSprint("X", "Km 20", expectedLines);
+        var expectedLines = new HashMap<Integer, Time>();
+        var time = Time.parse("10:40:20");
+        expectedLines.put(10, time);
+        expectedLines.put(18, time);
+        expectedLines.put(40, time);
+        var expected = new BonusSprint("X", "Km 20", expectedLines, new ArrayList<Integer>() {{ 
+            add(10);
+            add(18);
+            add(40);
+        }});
 
-        var actual = Race.parse(lines);
+        var actual = Race.parse(lines, time);
 
         Assert.assertTrue(actual instanceof BonusSprint);
         Assert.assertEquals(expected.destination(), actual.destination());

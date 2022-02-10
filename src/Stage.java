@@ -1,11 +1,10 @@
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-public record Stage(StageHeader header, LocalTime startTime, List<Race> races) {
+public record Stage(StageHeader header, Time startTime, List<Race> races) {
     private static <T> BiConsumer<List<List<T>>, T> splitWhen(Predicate<T> pred) {
         return (lists, line) -> {
             if (pred.test(line))
@@ -25,12 +24,21 @@ public record Stage(StageHeader header, LocalTime startTime, List<Race> races) {
                 (a, b) -> {}
             );
 
-        var startTime = LocalTime.parse(chunks.get(0).get(1).split(", ")[1]);
+        var startTime = Time.parse(chunks.get(0).get(1).split(", ")[1]);
         var races = chunks.stream()
             .skip(1)
-            .map(Race::parse)
-            .collect(Collectors.toList());
+            .map(race -> Race.parse(race, startTime))
+            .toList();
 
         return new Stage(header, startTime, races);
+    }
+
+    public String toStringWith(List<Rankings> rankings, List<List<Integer>> withdrawals) {
+        return IntStream.range(0, races.size())
+            .boxed()
+            .map(i -> races.get(i).toStringWith(rankings.get(i), withdrawals.get(i)))
+            .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
+            .toString();
+
     }
 }
