@@ -11,8 +11,6 @@ public record Participant(int code, String name, String countryCode, String team
 
     @Override
     public String toString() {
-        return String.format(
-            "{ code: %d, name: %s, countryCode: %s, team: %s }", 
-            code, name, countryCode, team);
+        return String.format("(%02d) %s", code, name);
     }
 }

@@ -1,6 +1,7 @@
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 public abstract class Race {
     private final String destination;
@@ -53,14 +54,44 @@ public abstract class Race {
         };
     }
 
-    public String toStringWith(Rankings ranking, List<Integer> withdrawals) {
-        var formattedTop = top.stream()
-            .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append);
-        var formattedRanking = ranking.bonusSprint().entrySet().stream()
-            .sorted((e1, e2) -> e1.getValue() - e2.getValue())
+    public String headerString() {
+        return switch (this) {
+            case Climb c -> String.format("| Puerto: %-40s |\n| %9d Categoria - %13s | %-10s |\n",
+                destination, c.category(), "", distance());
+            default -> String.format("| Meta volante: %-21s | %-10s |\n", destination, distance);
+        };
+    }
+
+    public String stringifyTop(Map<Integer, Participant> participants) {
+        return IntStream.range(0, 3).boxed()
+            .map(i -> String.format(
+                "| %d. %-25s %s   %d Puntos |\n", 
+                i+1, participants.get(top.get(i)), times.get(top.get(i)), points()[i]))
             .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
             .toString();
+    }
 
-        return formattedRanking;
+    public String stringifyWithdrawals(List<Integer> withdrawals, Map<Integer, Participant> participants) {
+        if (withdrawals.size() == 0)
+            return "";
+
+        return String.format("| %48s |\n", "")
+            + String.format("| Abandonos: %37s |\n", "")
+            + withdrawals.stream()
+                .map(code -> String.format("| %-48s |\n", participants.get(code)))
+                .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
+                .toString();
+    }
+
+    public String toString(Map<Integer, Participant> participants, Rankings ranking, List<Integer> withdrawals) {
+        return headerString()
+            + "|--------------------------------------------------|\n"
+            + String.format("| Puntuación: %36s |\n", "")
+            + stringifyTop(participants)
+            + String.format("| %48s |\n", "")
+            + String.format("| Clasificación: %33s |\n", "")
+            + ranking.toString(this, participants)
+            + stringifyWithdrawals(withdrawals, participants)
+            + "|--------------------------------------------------|\n";
     }
 }

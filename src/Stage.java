@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
@@ -33,12 +34,15 @@ public record Stage(StageHeader header, Time startTime, List<Race> races) {
         return new Stage(header, startTime, races);
     }
 
-    public String toStringWith(List<Rankings> rankings, List<List<Integer>> withdrawals) {
-        return IntStream.range(0, races.size())
-            .boxed()
-            .map(i -> races.get(i).toStringWith(rankings.get(i), withdrawals.get(i)))
-            .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
-            .toString();
-
+    public String toString(Map<Integer, Participant> participants, List<Rankings> rankings, List<List<Integer>> withdrawals) {
+        return "----------------------------------------------------\n"
+            + header
+            + "|--------------------------------------------------|\n"
+            + String.format("| Salida: %s horas %25s |\n", startTime, "")
+            + "|--------------------------------------------------|\n"
+            + IntStream.range(0, races.size())
+                .boxed()
+                .map(i -> races.get(i).toString(participants, rankings.get(i), withdrawals.get(i)))
+                .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append);
     }
 }

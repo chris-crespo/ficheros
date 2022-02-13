@@ -3,6 +3,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class App {
@@ -19,10 +21,10 @@ public class App {
         return null;
     }
 
-    private static List<Participant> readParticipants(String filename) {
+    private static Map<Integer, Participant> readParticipants(String filename) {
         return readFile(filename).stream()
             .map(Participant::parse)
-            .collect(Collectors.toList());
+            .collect(Collectors.toMap(p -> p.code(), Function.identity()));
     }
 
     private static Stage readStage(String filename) {
@@ -30,8 +32,10 @@ public class App {
         return Stage.parse(fileContent);
     }
 
-    private static void generateStage(Stage stage, List<Rankings> rankings, List<List<Integer>> withdrawals) {
-        System.out.println(stage.toStringWith(rankings, withdrawals));
+    private static void generateStage(Stage stage, Map<Integer, Participant> participants, List<Rankings> rankings, List<List<Integer>> withdrawals) {
+        try {
+            Files.writeString(Path.of("x.txt"), stage.toString(participants, rankings, withdrawals));
+        } catch (IOException e) {}
         //Files.write(Path.of("Fichero Resultado Etapa 1.txt"), stage.toStringWith(rankings, withdrawals));
     }
 
@@ -48,7 +52,7 @@ public class App {
         var rankingsAndWithdrawals = stage.races().stream()
             .collect(
                 () -> new ArrayList<Pair<Rankings, List<Integer>>>() {{ 
-                    add(new Pair<>(Rankings.initialize(participants), new ArrayList<>())); 
+                    add(new Pair<>(Rankings.initialize(participants.keySet()), new ArrayList<>())); 
                 }},
                 (lists, race) -> {
                     var prev = lists.get(lists.size() - 1);
@@ -65,14 +69,17 @@ public class App {
             );
 
         var rankings = rankingsAndWithdrawals.stream()
+                .skip(1)
                 .map(p -> p.first())
                 .toList();
 
         var withdrawals = rankingsAndWithdrawals.stream()
+                .skip(1)
                 .map(p -> p.second())
                 .toList();
 
-                generateStage(stage, rankings, withdrawals);
+        rankings.forEach(System.out::println);
+        generateStage(stage, participants, rankings, withdrawals);
             /*
         var extraInfo = stage.races().stream()
             .collect(

@@ -18,4 +18,9 @@ public record Time(int hours, int minutes, int seconds) {
             Integer.parseInt(fields[1]), 
             Integer.parseInt(fields[2]));
     }
+
+    @Override
+    public String toString() {
+        return String.format("%2d:%02d:%02d", hours, minutes, seconds);
+    }
 }
