@@ -1,14 +1,34 @@
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 
 public class App {
+    private static Optional<File> getFolder() {
+        var fileChooser = new JFileChooser();
+
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+        return switch (fileChooser.showOpenDialog(null)) {
+            case JFileChooser.APPROVE_OPTION -> Optional.of(fileChooser.getSelectedFile());
+            default -> Optional.empty();
+        };
+    }
+
     private static List<String> readFile(String filename) {
+        System.out.println(Path.of(filename));
         try {
             return Files.lines(Path.of(filename))
                 .filter(line -> !line.isBlank())
@@ -32,14 +52,66 @@ public class App {
         return Stage.parse(fileContent);
     }
 
-    private static void generateStage(Stage stage, Map<Integer, Participant> participants, List<Rankings> rankings, List<List<Integer>> withdrawals) {
+    private static void generateStage(Stage stage, Map<Integer, Participant> participants, List<Rankings> rankings) {
         try {
-            Files.writeString(Path.of("x.txt"), stage.toString(participants, rankings, withdrawals));
+            Files.writeString(Path.of("x.txt"), stage.toString(participants, rankings));
         } catch (IOException e) {}
         //Files.write(Path.of("Fichero Resultado Etapa 1.txt"), stage.toStringWith(rankings, withdrawals));
     }
 
+    private static List<Rankings> generateRankings(Stage stage, Map<Integer, Participant> participants, Rankings prevRankings) {
+        return stage.races().stream()
+            .collect(() -> new ArrayList<Rankings>() {{ add(prevRankings); }},
+                (list, race) -> {
+                    var last = list.get(list.size() - 1);
+                    var next = Rankings.generateNext(last, race);
+
+                    list.add(next);
+                },
+                (a, b) -> {})
+            .subList(1, stage.races().size());
+    }
+
+    private static void writeStage(String path, String contents) {
+        try {
+            Files.writeString(Path.of(path), contents);
+        }
+        catch (IOException e) {
+            System.out.println("xxxxxxxxxxxxxxxx");
+        }
+    }
+
+    private static <T> Map<Integer, T> filterWithdrawals(Race lastRace, Map<Integer, T> map) {
+        return map.entrySet().stream()
+            .filter(entry -> lastRace.times().containsKey(entry.getKey()))
+            .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+    }
+
     public static void main(String[] args) throws Exception {
+        getFolder().ifPresent(folder -> {
+            var participants = readParticipants(folder + "/Fichero Participantes.txt");
+            var stageNumber = 4;
+            var prevRankings = Rankings.initialize(participants.keySet());
+
+            for (int i = 0; i < stageNumber; i++) {
+                var stagePath = String.format("%s/Fichero Etapa %d.txt", folder, i+1);
+                var stage = readStage(stagePath);
+                var rankings = generateRankings(stage, participants, prevRankings);
+
+                var resultPath = String.format("%s/Resultado Etapa %d.txt", folder, i+1);
+                writeStage(resultPath, stage.toString(participants, rankings));
+
+                var lastRace = Utils.last(stage.races());
+                participants = filterWithdrawals(lastRace, participants);
+
+                var lastRanking = Utils.last(rankings);
+                prevRankings = new Rankings(
+                    filterWithdrawals(lastRace, lastRanking.bonusSprint()),
+                    filterWithdrawals(lastRace, lastRanking.climb())
+                );
+            }
+        });
+        /*
         var participants = readParticipants("Fichero Participantes.txt");
         var stage = readStage("Ejercicio Fichero Texto/Fichero Etapa 1.txt");
         System.out.println("Stage => Code: " + stage.header().code() + " Start: " + stage.startTime());
@@ -49,49 +121,24 @@ public class App {
                 .forEach(entry -> System.out.println("Time => " + entry.getKey() + " " + entry.getValue()));
         });
 
-        var rankingsAndWithdrawals = stage.races().stream()
+        var rankings = stage.races().stream()
             .collect(
-                () -> new ArrayList<Pair<Rankings, List<Integer>>>() {{ 
-                    add(new Pair<>(Rankings.initialize(participants.keySet()), new ArrayList<>())); 
+                () -> new ArrayList<Rankings>() {{ 
+                    add(Rankings.initialize(participants.keySet())); 
                 }},
-                (lists, race) -> {
-                    var prev = lists.get(lists.size() - 1);
-                    var lastRanking = prev.first();
-                    var nextRanking = Rankings.generateNext(lastRanking, race);
-                    var withdrawals = lastRanking.bonusSprint().entrySet().stream()
-                        .map(entry -> entry.getKey())
-                        .filter(key -> !nextRanking.bonusSprint().containsKey(key))
-                        .toList();
+                (list, race) -> {
+                    var last = list.get(list.size() - 1);
+                    var next = Rankings.generateNext(last, race);
 
-                    lists.add(new Pair<>(nextRanking, withdrawals));
+                    list.add(next);
                 },
                 (a, b) -> {}
-            );
-
-        var rankings = rankingsAndWithdrawals.stream()
-                .skip(1)
-                .map(p -> p.first())
-                .toList();
-
-        var withdrawals = rankingsAndWithdrawals.stream()
-                .skip(1)
-                .map(p -> p.second())
-                .toList();
+            )
+            .subList(1, stage.races().size());
 
         rankings.forEach(System.out::println);
-        generateStage(stage, participants, rankings, withdrawals);
-            /*
-        var extraInfo = stage.races().stream()
-            .collect(
-                () -> new Pair<>(
-                    new ArrayList<Rankings>() {{ add(Rankings.initialize(participants)); }},
-                    new ArrayList<Participants>(),
-                ),
-                (lists, race) -> {
-                    var last = list.get(list.size() - 1);
-                    var lastRanking = last.first();
-                }
-            )
-            */
+        generateStage(stage, participants, rankings);
+        */
     }
+
 }

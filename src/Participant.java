@@ -13,4 +13,12 @@ public record Participant(int code, String name, String countryCode, String team
     public String toString() {
         return String.format("(%02d) %s", code, name);
     }
+
+    public String toStringWithTeam() {
+        return String.format("(%02d) %s - %s", code, name, team);
+    }
+
+    public String toStringWithCountry() {
+        return String.format("(%02d) %s (%s)", code, name, countryCode);
+    }
 }

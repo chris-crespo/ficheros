@@ -9,6 +9,6 @@ public record StageHeader(int code, String tour, String distance) {
 
     @Override
     public String toString() {
-        return String.format("| Etapa %-2d |    %-18s    | %-10s |\n", code, tour, distance);
+        return String.format("| Etapa %-2d |    %-22s    | %-10s |\n", code, tour, distance);
     }
 }

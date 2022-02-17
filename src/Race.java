@@ -23,29 +23,31 @@ public abstract class Race {
 
     public abstract int[] points(); 
 
+    private static List<Integer> parseTop(List<String> lines) {
+        return lines.stream()
+            .skip(1)
+            .limit(4)
+            .map(line -> Integer.parseInt(line.split(", ")[0]))
+            .toList();
+    }
+
+    private static Map<Integer, Time> parseTime(List<String> lines, Time startTime) {
+        return lines.stream()
+            .skip(1)
+            .takeWhile(str -> Character.isDigit(str.charAt(0)))
+            .collect(HashMap<Integer, Time>::new, (map, item) -> {
+                var fields = item.split(", ");
+                map.put( Integer.parseInt(fields[0]), Time.diff(startTime, Time.parse(fields[1])));
+            }, (a, b) -> {});
+    }
+
     public static Race parse(List<String> lines, Time startTime) {
         var headerFields = lines.get(0).split(": ");
         var raceKind = headerFields[0];
         var raceInfo = headerFields[1].split(" - ");
 
-        var top = lines.stream()
-            .skip(1)
-            .limit(4)
-            .map(line -> {
-                var fields = line.split(", ");
-                return Integer.parseInt(fields[0]);
-            })
-            .toList();
-
-        var times = lines.stream()
-            .skip(1)
-            .takeWhile(str -> Character.isDigit(str.charAt(0)))
-            .collect(HashMap<Integer, Time>::new, (map, item) -> {
-                var fields = item.split(", ");
-                map.put(
-                    Integer.parseInt(fields[0]), 
-                    Time.diff(startTime, Time.parse(fields[1])));
-            }, (a, b) -> {});
+        var top = parseTop(lines);
+        var times = parseTime(lines, startTime);
 
         return switch (raceKind) {
             case "Meta volante" -> new BonusSprint(raceInfo[0], raceInfo[1], times, top);
@@ -56,16 +58,16 @@ public abstract class Race {
 
     public String headerString() {
         return switch (this) {
-            case Climb c -> String.format("| Puerto: %-40s |\n| %9d Categoria - %13s | %-10s |\n",
+            case Climb c -> String.format("| Puerto: %-44s |\n| %9d Categoria %19s | %-10s |\n",
                 destination, c.category(), "", distance());
-            default -> String.format("| Meta volante: %-21s | %-10s |\n", destination, distance);
+            default -> String.format("| Meta volante: %-25s | %-10s |\n", destination, distance);
         };
     }
 
     public String stringifyTop(Map<Integer, Participant> participants) {
         return IntStream.range(0, 3).boxed()
             .map(i -> String.format(
-                "| %d. %-25s %s   %d Puntos |\n", 
+                "| %d. %-29s %s   %d puntos |\n", 
                 i+1, participants.get(top.get(i)), times.get(top.get(i)), points()[i]))
             .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
             .toString();
@@ -75,23 +77,22 @@ public abstract class Race {
         if (withdrawals.size() == 0)
             return "";
 
-        return String.format("| %48s |\n", "")
-            + String.format("| Abandonos: %37s |\n", "")
+        return Utils.blank
+            + String.format("| Abandonos: %41s |\n", "")
             + withdrawals.stream()
-                .map(code -> String.format("| %-48s |\n", participants.get(code)))
+                .map(code -> String.format("| %-52s |\n", participants.get(code)))
                 .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
                 .toString();
     }
 
-    public String toString(Map<Integer, Participant> participants, Rankings ranking, List<Integer> withdrawals) {
+    public String toString(Map<Integer, Participant> participants, Rankings ranking) {
         return headerString()
-            + "|--------------------------------------------------|\n"
-            + String.format("| Puntuación: %36s |\n", "")
+            + Utils.separator
+            + String.format("| Puntuación: %40s |\n", "")
             + stringifyTop(participants)
-            + String.format("| %48s |\n", "")
-            + String.format("| Clasificación: %33s |\n", "")
+            + Utils.blank
+            + String.format("| Clasificación: %37s |\n", "")
             + ranking.toString(this, participants)
-            + stringifyWithdrawals(withdrawals, participants)
-            + "|--------------------------------------------------|\n";
+            + Utils.separator;
     }
 }

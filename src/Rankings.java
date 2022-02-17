@@ -1,5 +1,4 @@
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -15,10 +14,7 @@ public record Rankings(Map<Integer, Integer> bonusSprint, Map<Integer, Integer> 
     }
 
     public static Map<Integer, Integer> generateNextMap(Map<Integer, Integer> prev, Race race) {
-        var participants = race.times().entrySet().stream()
-            .map(entry -> entry.getKey())
-            .collect(Collectors.toMap(Function.identity(), x -> 0));
-        var map = new HashMap<Integer, Integer>(participants);
+        var map = new HashMap<Integer, Integer>(prev);
 
         IntStream.range(0, 4).forEach(i -> {
             map.replace(
@@ -43,7 +39,7 @@ public record Rankings(Map<Integer, Integer> bonusSprint, Map<Integer, Integer> 
         };
     }
 
-    private String toString(Map<Integer, Integer> ranking) {
+    private String toString(Map<Integer, Integer> ranking, Map<Integer, Participant> participants) {
         var set = ranking.entrySet();
         var sortedEntries = set.stream()
             .filter(entry -> entry.getValue() > 0)
@@ -52,16 +48,48 @@ public record Rankings(Map<Integer, Integer> bonusSprint, Map<Integer, Integer> 
             
         return IntStream.range(0, sortedEntries.size())
             .boxed()
-            .map(i -> String.format(
-                "| %d. %d |\n", i+1, sortedEntries.get(i).getValue()))
+            .map(i -> {
+                var entryKey = sortedEntries.get(i).getKey();
+                return String.format(
+                    "| %d. %-40s %d puntos |\n", 
+                    i+1, 
+                    participants.get(entryKey).toStringWithTeam(),
+                    ranking.get(entryKey));
+            })
             .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
             .toString();
     }
 
     public String toString(Race race, Map<Integer, Participant> participants) {
         return switch (race) {
-            case Climb c -> toString(climb);
-            default -> toString(bonusSprint);
+            case Climb c -> toString(climb, participants);
+            default -> toString(bonusSprint, participants);
         };
+    }
+
+    public String stringifyRanking(Map<Integer, Integer> ranking, Map<Integer, Participant> participants) {
+        var sortedEntries = ranking.entrySet().stream()
+            .sorted((e1, e2) -> e2.getValue() - e1.getValue())
+            .takeWhile(e -> e.getValue() > 0)
+            .toList();
+
+        return IntStream.range(0, sortedEntries.size())
+            .boxed()
+            .map(i -> {
+                var entry = sortedEntries.get(i);
+                var participant = participants.get(entry.getKey());
+                return String.format("| %2d. %-39s %d puntos |\n",
+                    i+1, participant.toStringWithTeam(), entry.getValue());
+            })
+            .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
+            .toString();
+    }
+
+    public String stringifyBoth(Map<Integer, Participant> participants) {
+        return String.format("| METAS VOLANTES: %36s |\n", " ")
+            + stringifyRanking(bonusSprint, participants)
+            + Utils.separator
+            + String.format("| MONTAÑA: %43s |\n", " ")
+            + stringifyRanking(climb, participants);
     }
 }
