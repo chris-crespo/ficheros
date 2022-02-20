@@ -3,14 +3,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
+import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -28,14 +26,14 @@ public class App {
     }
 
     private static List<String> readFile(String filename) {
-        System.out.println(Path.of(filename));
         try {
             return Files.lines(Path.of(filename))
                 .filter(line -> !line.isBlank())
                 .collect(Collectors.toList());
         }
         catch (IOException e) {
-            System.out.println(e.getMessage());
+            JOptionPane.showMessageDialog(null, "No se pudo leer el archivo: " + filename);
+            System.exit(1);
         }
 
         return null;
@@ -52,11 +50,18 @@ public class App {
         return Stage.parse(fileContent);
     }
 
-    private static void generateStage(Stage stage, Map<Integer, Participant> participants, List<Rankings> rankings) {
+    private static int askStage() {
         try {
-            Files.writeString(Path.of("x.txt"), stage.toString(participants, rankings));
-        } catch (IOException e) {}
-        //Files.write(Path.of("Fichero Resultado Etapa 1.txt"), stage.toStringWith(rankings, withdrawals));
+            var input = JOptionPane.showInputDialog(null, "Introduce la etapa: ");
+            if (input == null)
+                System.exit(0);
+
+            return Integer.parseInt(input);
+        }
+        catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "La entrada no es correcta.");
+            return askStage();
+        }
     }
 
     private static List<Rankings> generateRankings(Stage stage, Map<Integer, Participant> participants, Rankings prevRankings) {
@@ -77,7 +82,8 @@ public class App {
             Files.writeString(Path.of(path), contents);
         }
         catch (IOException e) {
-            System.out.println("xxxxxxxxxxxxxxxx");
+            JOptionPane.showMessageDialog(null, "No se pudo escribir el archivo: " + path);
+            System.exit(1);
         }
     }
 
@@ -87,58 +93,41 @@ public class App {
             .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
     }
 
+    private static Function<Entry<Integer, Time>, Entry<Integer, Time>> accumulateTimes(Map<Integer, Time> times) {
+        return e -> Map.entry(e.getKey(), Time.sum(e.getValue(), times.get(e.getKey())));
+    }
+
     public static void main(String[] args) throws Exception {
         getFolder().ifPresent(folder -> {
             var participants = readParticipants(folder + "/Fichero Participantes.txt");
-            var stageNumber = 4;
+            var stageNumber  = askStage();
             var prevRankings = Rankings.initialize(participants.keySet());
+            var times = participants.keySet().stream()
+                .collect(Collectors.toMap(Function.identity(), x -> Time.fromSeconds(0)));
 
             for (int i = 0; i < stageNumber; i++) {
                 var stagePath = String.format("%s/Fichero Etapa %d.txt", folder, i+1);
                 var stage = readStage(stagePath);
-                var rankings = generateRankings(stage, participants, prevRankings);
+                var rankings = stage.header().timed()
+                    ? List.of(prevRankings)
+                    : generateRankings(stage, participants, prevRankings);
+
+                times = Utils.last(stage.races()).times().entrySet().stream()
+                    .map(accumulateTimes(times))
+                    .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
 
                 var resultPath = String.format("%s/Resultado Etapa %d.txt", folder, i+1);
-                writeStage(resultPath, stage.toString(participants, rankings));
+                writeStage(resultPath, stage.toString(participants, rankings, times));
 
                 var lastRace = Utils.last(stage.races());
-                participants = filterWithdrawals(lastRace, participants);
-
                 var lastRanking = Utils.last(rankings);
+
+                participants = filterWithdrawals(lastRace, participants);
                 prevRankings = new Rankings(
                     filterWithdrawals(lastRace, lastRanking.bonusSprint()),
                     filterWithdrawals(lastRace, lastRanking.climb())
                 );
             }
         });
-        /*
-        var participants = readParticipants("Fichero Participantes.txt");
-        var stage = readStage("Ejercicio Fichero Texto/Fichero Etapa 1.txt");
-        System.out.println("Stage => Code: " + stage.header().code() + " Start: " + stage.startTime());
-        stage.races().forEach(race -> {
-            System.out.println("Race => " + race.destination() + " " + race.distance());
-            race.times().entrySet()
-                .forEach(entry -> System.out.println("Time => " + entry.getKey() + " " + entry.getValue()));
-        });
-
-        var rankings = stage.races().stream()
-            .collect(
-                () -> new ArrayList<Rankings>() {{ 
-                    add(Rankings.initialize(participants.keySet())); 
-                }},
-                (list, race) -> {
-                    var last = list.get(list.size() - 1);
-                    var next = Rankings.generateNext(last, race);
-
-                    list.add(next);
-                },
-                (a, b) -> {}
-            )
-            .subList(1, stage.races().size());
-
-        rankings.forEach(System.out::println);
-        generateStage(stage, participants, rankings);
-        */
     }
-
 }

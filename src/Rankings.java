@@ -56,8 +56,8 @@ public record Rankings(Map<Integer, Integer> bonusSprint, Map<Integer, Integer> 
                     participants.get(entryKey).toStringWithTeam(),
                     ranking.get(entryKey));
             })
-            .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
-            .toString();
+            .reduce((acc, str) -> acc + str)
+            .orElse("");
     }
 
     public String toString(Race race, Map<Integer, Participant> participants) {
@@ -78,7 +78,7 @@ public record Rankings(Map<Integer, Integer> bonusSprint, Map<Integer, Integer> 
             .map(i -> {
                 var entry = sortedEntries.get(i);
                 var participant = participants.get(entry.getKey());
-                return String.format("| %2d. %-39s %d puntos |\n",
+                return String.format("| %2d. %-39s %3d puntos |\n",
                     i+1, participant.toStringWithTeam(), entry.getValue());
             })
             .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)

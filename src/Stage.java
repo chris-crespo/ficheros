@@ -4,9 +4,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public record Stage(StageHeader header, Time startTime, List<Race> races) {
+public record Stage(StageHeader header, Map<Integer, Time> startTimes, List<Race> races) {
     private static <T> BiConsumer<List<List<T>>, T> splitWhen(Predicate<T> pred) {
         return (lists, line) -> {
             if (pred.test(line))
@@ -16,7 +17,7 @@ public record Stage(StageHeader header, Time startTime, List<Race> races) {
         };
     }
 
-    private static boolean hasNoRaces(List<String> chunk) {
+    private static boolean hasNoTimes(List<String> chunk) {
         return chunk.size() == 1;
     }
 
@@ -28,26 +29,36 @@ public record Stage(StageHeader header, Time startTime, List<Race> races) {
                 (a, b) -> {});
 
         var secondLast = Utils.secondLast(chunks);
-        if (hasNoRaces(secondLast)) // Por ejemplo, puerto y meta juntos
+        if (hasNoTimes(secondLast)) // Por ejemplo, puerto y meta juntos
             Utils.last(chunks).stream().skip(1).forEach(secondLast::add);
 
         return chunks;
     }
 
-    private static List<Race> parseRaces(List<List<String>> chunks, Time startTime) {
+    private static Map<Integer, Time> parseStartTimes(List<String> chunk) {
+        return chunk.stream()
+            .skip(1) // Cabecera del bloque ('Salida')
+            .map(str -> {
+                var fields = str.split(", ");
+                return Map.entry(Integer.parseInt(fields[0]), Time.parse(fields[1]));
+            })
+            .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+    }
+
+    private static List<Race> parseRaces(List<List<String>> chunks, Map<Integer, Time> startTimes) {
         return chunks.stream()
             .skip(1)
-            .map(race -> Race.parse(race, startTime))
+            .map(race -> Race.parse(race, startTimes))
             .toList();
     }
 
     public static Stage parse(List<String> lines) {
         var header = StageHeader.parse(lines.get(0));
         var chunks = parseChunks(lines);
-        var startTime = Time.parse(chunks.get(0).get(1).split(", ")[1]);
-        var races = parseRaces(chunks, startTime);
+        var startTimes = parseStartTimes(chunks.get(0));
+        var races = parseRaces(chunks, startTimes);
 
-        return new Stage(header, startTime, races);
+        return new Stage(header, startTimes, races);
     }
 
     private String stringifyRaces(Map<Integer, Participant> participants, List<Rankings> rankings) {
@@ -62,8 +73,8 @@ public record Stage(StageHeader header, Time startTime, List<Race> races) {
             .orElse("");
     }
 
-    private String stringifyTop4(Map<Integer, Participant> participants, Race lastRace) {
-        var sortedTimes = lastRace.times().entrySet().stream()
+    private String stringifyTop4(Map<Integer, Participant> participants, Map<Integer, Time> endTimes) {
+        var sortedTimes = endTimes.entrySet().stream()
             .sorted(Comparator.comparing(e -> e.getValue().toSeconds()))
             .toList();
 
@@ -73,14 +84,14 @@ public record Stage(StageHeader header, Time startTime, List<Race> races) {
                 var entry = sortedTimes.get(i);
                 var participant = participants.get(entry.getKey());
                 return String.format("| %2d. %-36s %-11s |\n", 
-                    i+1, participant.toStringWithCountry(), entry.getValue());
+                    i+1, participant.toStringWithCountry(), endTimes.get(entry.getKey()));
             })
             .reduce((acc, str) -> acc + str)
             .orElse("");
     }
 
-    private String stringifyLast(Map<Integer, Participant> participants, Race lastRace) {
-        var sortedTimes = lastRace.times().entrySet().stream()
+    private String stringifyLast(Map<Integer, Participant> participants, Map<Integer, Time> endTime) {
+        var sortedTimes = endTime.entrySet().stream()
             .sorted(Comparator.comparing(e -> e.getValue().toSeconds()))
             .toList();
 
@@ -88,48 +99,57 @@ public record Stage(StageHeader header, Time startTime, List<Race> races) {
         var participant = participants.get(last.getKey());
 
         return String.format("| %2d. %-36s %-11s |\n", 
-            sortedTimes.size(), participant.toStringWithCountry(), last.getValue());
+            sortedTimes.size(), participant.toStringWithCountry(), endTime.get(last.getKey()));
     }
 
-    private String stringifyFinishTop(Map<Integer, Participant> participants, Race lastRace) {
-        return stringifyTop4(participants, lastRace)
+    private String stringifyFinishTop(Map<Integer, Participant> participants, Map<Integer, Time> endTimes) {
+        return stringifyTop4(participants, endTimes)
             + String.format("|  5.   .......... %35s |\n", "")
             + Utils.blank
-            + stringifyLast(participants, lastRace);
+            + stringifyLast(participants, endTimes);
     }
 
     private String stringifyWithdrawals(Map<Integer, Participant> participants, Race lastRace) {
-        return participants.keySet().stream()
+        var withdrawals =  participants.keySet().stream()
             .filter(key -> !lastRace.times().containsKey(key))
             .map(key -> String.format("|   %-50s |\n", participants.get(key)))
-            .reduce((acc, str) -> acc + str)
-            .orElse("");
+            .reduce((acc, str) -> acc + str);
+
+        return withdrawals.isPresent()
+            ?  Utils.blank + String.format("| Abandonos: %41s |\n", "") + withdrawals.get()
+            : "";
     }
 
-    private String stringifyFinishLine(Race lastRace, Rankings lastRanking, Map<Integer, Participant> participants) {
+    private String stringifyFinishLine(Race lastRace, Map<Integer, Participant> participants) {
         return String.format("| META: %-33s | %-10s |\n", lastRace.destination(), lastRace.distance())
             + Utils.separator
-            + stringifyFinishTop(participants, lastRace)
-            + Utils.blank
-            + String.format("| Abandonos: %41s |\n", "")
+            + stringifyFinishTop(participants, lastRace.times())
             + stringifyWithdrawals(participants, lastRace);
     }
 
-    public String toString(Map<Integer, Participant> participants, List<Rankings> rankings) {
+    private boolean isTimedTrial() {
+        var times = startTimes.values().stream().toList();
+        return times.get(0) != Utils.last(times);
+    }
+
+    public String toString(Map<Integer, Participant> participants, List<Rankings> rankings, Map<Integer, Time> endTimes) {
+        System.out.println("Races: " + races + ". Rankings: " + rankings + ". End: " + endTimes);
         return Utils.outer
             + header
             + Utils.separator
-            + String.format("| Salida: %s horas %29s |\n", startTime, "")
+            + (isTimedTrial()
+                ? String.format("| Contrarreloj %30s |\n", "")
+                : String.format("| Salida: %s horas %29s |\n", startTimes.values().iterator().next(), ""))
             + Utils.separator
             + stringifyRaces(participants, rankings)
-            + stringifyFinishLine(Utils.last(races), Utils.last(rankings), participants)
+            + stringifyFinishLine(Utils.last(races), participants)
             + Utils.outer
             + "\n"
             + Utils.outer
             + String.format("| %s |\n", Utils.center("CLASIFICACIONES", 37))
             + Utils.separator
             + String.format("| GENERAL: %43s |\n", "")
-            + stringifyFinishTop(participants, Utils.last(races))
+            + stringifyFinishTop(participants, endTimes)
             + Utils.separator
             + Utils.last(rankings).stringifyBoth(participants)
             + Utils.outer;

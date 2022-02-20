@@ -31,23 +31,23 @@ public abstract class Race {
             .toList();
     }
 
-    private static Map<Integer, Time> parseTime(List<String> lines, Time startTime) {
+    private static Map<Integer, Time> parseTime(List<String> lines, Map<Integer, Time> startTimes) {
         return lines.stream()
             .skip(1)
             .takeWhile(str -> Character.isDigit(str.charAt(0)))
             .collect(HashMap<Integer, Time>::new, (map, item) -> {
                 var fields = item.split(", ");
-                map.put( Integer.parseInt(fields[0]), Time.diff(startTime, Time.parse(fields[1])));
+                var key = Integer.parseInt(fields[0]);
+                map.put(key, Time.diff(startTimes.get(key), Time.parse(fields[1])));
             }, (a, b) -> {});
     }
 
-    public static Race parse(List<String> lines, Time startTime) {
+    public static Race parse(List<String> lines, Map<Integer, Time> startTimes) {
         var headerFields = lines.get(0).split(": ");
         var raceKind = headerFields[0];
         var raceInfo = headerFields[1].split(" - ");
-
         var top = parseTop(lines);
-        var times = parseTime(lines, startTime);
+        var times = parseTime(lines, startTimes);
 
         return switch (raceKind) {
             case "Meta volante" -> new BonusSprint(raceInfo[0], raceInfo[1], times, top);
@@ -59,15 +59,14 @@ public abstract class Race {
     public String headerString() {
         return switch (this) {
             case Climb c -> String.format("| Puerto: %-44s |\n| %9d Categoria %19s | %-10s |\n",
-                destination, c.category(), "", distance());
+                destination, c.category(), "", distance);
             default -> String.format("| Meta volante: %-25s | %-10s |\n", destination, distance);
         };
     }
 
     public String stringifyTop(Map<Integer, Participant> participants) {
         return IntStream.range(0, 3).boxed()
-            .map(i -> String.format(
-                "| %d. %-29s %s   %d puntos |\n", 
+            .map(i -> String.format("| %d. %-29s %s %d puntos |\n", 
                 i+1, participants.get(top.get(i)), times.get(top.get(i)), points()[i]))
             .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
             .toString();

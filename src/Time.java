@@ -11,6 +11,10 @@ public record Time(int hours, int minutes, int seconds) {
         return Time.fromSeconds(Math.abs(t1.toSeconds() - t2.toSeconds()));
     }
 
+    public static Time sum(Time t1, Time t2) {
+        return Time.fromSeconds(t1.toSeconds() + t2.toSeconds());
+    }
+
     public static Time parse(String time) {
         var fields = time.split(":");
         return new Time(
