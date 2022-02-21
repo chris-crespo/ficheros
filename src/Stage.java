@@ -83,7 +83,7 @@ public record Stage(StageHeader header, Map<Integer, Time> startTimes, List<Race
             .map(i -> {
                 var entry = sortedTimes.get(i);
                 var participant = participants.get(entry.getKey());
-                return String.format("| %2d. %-36s %-11s |\n", 
+                return String.format("| %2d. %-44s %-11s |\n", 
                     i+1, participant.toStringWithCountry(), endTimes.get(entry.getKey()));
             })
             .reduce((acc, str) -> acc + str)
@@ -98,13 +98,13 @@ public record Stage(StageHeader header, Map<Integer, Time> startTimes, List<Race
         var last = Utils.last(sortedTimes);
         var participant = participants.get(last.getKey());
 
-        return String.format("| %2d. %-36s %-11s |\n", 
+        return String.format("| %2d. %-44s %-11s |\n", 
             sortedTimes.size(), participant.toStringWithCountry(), endTime.get(last.getKey()));
     }
 
     private String stringifyFinishTop(Map<Integer, Participant> participants, Map<Integer, Time> endTimes) {
         return stringifyTop4(participants, endTimes)
-            + String.format("|  5.   .......... %35s |\n", "")
+            + String.format("|  5.   .......... %43s |\n", "")
             + Utils.blank
             + stringifyLast(participants, endTimes);
     }
@@ -112,43 +112,37 @@ public record Stage(StageHeader header, Map<Integer, Time> startTimes, List<Race
     private String stringifyWithdrawals(Map<Integer, Participant> participants, Race lastRace) {
         var withdrawals =  participants.keySet().stream()
             .filter(key -> !lastRace.times().containsKey(key))
-            .map(key -> String.format("|   %-50s |\n", participants.get(key)))
+            .map(key -> String.format("|   %-58s |\n", participants.get(key)))
             .reduce((acc, str) -> acc + str);
 
         return withdrawals.isPresent()
-            ?  Utils.blank + String.format("| Abandonos: %41s |\n", "") + withdrawals.get()
+            ?  Utils.blank + String.format("| Abandonos: %49s |\n", "") + withdrawals.get()
             : "";
     }
 
     private String stringifyFinishLine(Race lastRace, Map<Integer, Participant> participants) {
-        return String.format("| META: %-33s | %-10s |\n", lastRace.destination(), lastRace.distance())
+        return String.format("| META: %-41s | %-10s |\n", lastRace.destination(), lastRace.distance())
             + Utils.separator
             + stringifyFinishTop(participants, lastRace.times())
             + stringifyWithdrawals(participants, lastRace);
     }
 
-    private boolean isTimedTrial() {
-        var times = startTimes.values().stream().toList();
-        return times.get(0) != Utils.last(times);
-    }
-
     public String toString(Map<Integer, Participant> participants, List<Rankings> rankings, Map<Integer, Time> endTimes) {
-        System.out.println("Races: " + races + ". Rankings: " + rankings + ". End: " + endTimes);
         return Utils.outer
             + header
             + Utils.separator
-            + (isTimedTrial()
-                ? String.format("| Contrarreloj %30s |\n", "")
-                : String.format("| Salida: %s horas %29s |\n", startTimes.values().iterator().next(), ""))
+            + (header.timed()
+                ? String.format("| %-60s |\n", "Contrareloj")
+                : String.format("| Salida: %s horas %37s |\n", startTimes.values().iterator().next(), ""))
             + Utils.separator
             + stringifyRaces(participants, rankings)
             + stringifyFinishLine(Utils.last(races), participants)
             + Utils.outer
             + "\n"
             + Utils.outer
-            + String.format("| %s |\n", Utils.center("CLASIFICACIONES", 37))
+            + String.format("| %s |\n", Utils.center("CLASIFICACIONES", 45))
             + Utils.separator
-            + String.format("| GENERAL: %43s |\n", "")
+            + String.format("| GENERAL: %51s |\n", "")
             + stringifyFinishTop(participants, endTimes)
             + Utils.separator
             + Utils.last(rankings).stringifyBoth(participants)

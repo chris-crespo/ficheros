@@ -1,47 +1,47 @@
---------------------------------------------------------
-| Etapa 4  |    Elche / Alicante          | 31.1 Km    |
-|------------------------------------------------------|
-| Contrarreloj                                |
-|------------------------------------------------------|
-| META: Alicante                          | Km 31.1    |
-|------------------------------------------------------|
-|  1. (12) Lennard Hofstede (NED)           0:31:25    |
-|  2. (52) Eddy Fine (FRA)                  0:31:59    |
-|  3. (42) Johan Jacobs (SUI)               0:32:02    |
-|  4. (60) Mikel Bizkarra (ESP)             0:32:03    |
-|  5.   ..........                                     |
-|                                                      |
-| 16. (11) Robert Gesink (NED)              0:33:25    |
---------------------------------------------------------
+----------------------------------------------------------------
+| Etapa 4  |    Elche / Alicante                  | 31.1 Km    |
+|--------------------------------------------------------------|
+| Contrareloj                                                  |
+|--------------------------------------------------------------|
+| META: Alicante                                  | Km 31.1    |
+|--------------------------------------------------------------|
+|  1. (12) Lennard Hofstede (NED)                   0:31:25    |
+|  2. (52) Eddy Fine (FRA)                          0:31:59    |
+|  3. (42) Johan Jacobs (SUI)                       0:32:02    |
+|  4. (60) Mikel Bizkarra (ESP)                     0:32:03    |
+|  5.   ..........                                             |
+|                                                              |
+| 16. (11) Robert Gesink (NED)                      0:33:25    |
+----------------------------------------------------------------
 
---------------------------------------------------------
-|                    CLASIFICACIONES                   |
-|------------------------------------------------------|
-| GENERAL:                                             |
-|  1. (12) Lennard Hofstede (NED)          12:29:12    |
-|  2. (30) Omar Fraile (ESP)               12:29:59    |
-|  3. (52) Eddy Fine (FRA)                 12:30:11    |
-|  4. (42) Johan Jacobs (SUI)              12:30:13    |
-|  5.   ..........                                     |
-|                                                      |
-| 16. (11) Robert Gesink (NED)             12:31:40    |
-|------------------------------------------------------|
-| METAS VOLANTES:                                      |
-|  1. (30) Omar Fraile - Astana-Premier Tech   19 puntos |
-|  2. (52) Eddy Fine - Cofidis                  9 puntos |
-|  3. (12) Lennard Hofstede - Jumbo-Visma       6 puntos |
-|  4. (10) Primoz Roglic - Jumbo-Visma          5 puntos |
-|  5. (21) Adam Yates - Ineos Grenadiers        5 puntos |
-|  6. (62) Mikel Bizkarra - Euskaltel-Euskadi   5 puntos |
-|  7. (40) Enric Max - Movistar                 3 puntos |
-|  8. (50) Guillaume Martin - Cofidis           1 puntos |
-|  9. (31) Oscar Rodriguez - Astana-Premier Tech   1 puntos |
-|------------------------------------------------------|
-| MONTAÑA:                                             |
-|  1. (40) Enric Max - Movistar                40 puntos |
-|  2. (12) Lennard Hofstede - Jumbo-Visma      40 puntos |
-|  3. (21) Adam Yates - Ineos Grenadiers       28 puntos |
-|  4. (30) Omar Fraile - Astana-Premier Tech   10 puntos |
-|  5. (20) Egan Bernal - Ineos Grenadiers       8 puntos |
-|  6. (10) Primoz Roglic - Jumbo-Visma          4 puntos |
---------------------------------------------------------
+----------------------------------------------------------------
+|                        CLASIFICACIONES                       |
+|--------------------------------------------------------------|
+| GENERAL:                                                     |
+|  1. (12) Lennard Hofstede (NED)                  12:29:12    |
+|  2. (30) Omar Fraile (ESP)                       12:29:59    |
+|  3. (52) Eddy Fine (FRA)                         12:30:11    |
+|  4. (42) Johan Jacobs (SUI)                      12:30:13    |
+|  5.   ..........                                             |
+|                                                              |
+| 16. (11) Robert Gesink (NED)                     12:31:40    |
+|--------------------------------------------------------------|
+| METAS VOLANTES:                                              |
+|  1. (30) Omar Fraile - Astana-Premier Tech         19 puntos |
+|  2. (52) Eddy Fine - Cofidis                        9 puntos |
+|  3. (12) Lennard Hofstede - Jumbo-Visma             6 puntos |
+|  4. (10) Primoz Roglic - Jumbo-Visma                5 puntos |
+|  5. (21) Adam Yates - Ineos Grenadiers              5 puntos |
+|  6. (62) Mikel Bizkarra - Euskaltel-Euskadi         5 puntos |
+|  7. (40) Enric Max - Movistar                       3 puntos |
+|  8. (50) Guillaume Martin - Cofidis                 1 puntos |
+|  9. (31) Oscar Rodriguez - Astana-Premier Tech      1 puntos |
+|--------------------------------------------------------------|
+| MONTAÑA:                                                     |
+|  1. (40) Enric Max - Movistar                      40 puntos |
+|  2. (12) Lennard Hofstede - Jumbo-Visma            40 puntos |
+|  3. (21) Adam Yates - Ineos Grenadiers             28 puntos |
+|  4. (30) Omar Fraile - Astana-Premier Tech         10 puntos |
+|  5. (20) Egan Bernal - Ineos Grenadiers             8 puntos |
+|  6. (10) Primoz Roglic - Jumbo-Visma                4 puntos |
+----------------------------------------------------------------

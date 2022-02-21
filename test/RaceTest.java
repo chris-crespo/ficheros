@@ -23,8 +23,13 @@ public class RaceTest {
             add(18);
             add(40);
         }});
+        var expectedTimes = new HashMap<Integer, Time>() {{
+            put(10, time);
+            put(18, time);
+            put(40, time);
+        }};
 
-        var actual = Race.parse(lines, time);
+        var actual = Race.parse(lines, expectedTimes);
 
         Assert.assertTrue(actual instanceof BonusSprint);
         Assert.assertEquals(expected.destination(), actual.destination());

@@ -20,7 +20,7 @@ public class Utils {
         return String.format(format, " ", text, " ");
     }
 
-    public static String separator = "|------------------------------------------------------|\n";
-    public static String outer = "--------------------------------------------------------\n";
-    public static String blank = String.format("| %52s |\n", "");
+    public static String separator = "|--------------------------------------------------------------|\n";
+    public static String outer = "----------------------------------------------------------------\n";
+    public static String blank = String.format("| %60s |\n", "");
 }

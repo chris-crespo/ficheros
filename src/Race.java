@@ -58,15 +58,15 @@ public abstract class Race {
 
     public String headerString() {
         return switch (this) {
-            case Climb c -> String.format("| Puerto: %-44s |\n| %9d Categoria %19s | %-10s |\n",
+            case Climb c -> String.format("| Puerto: %-52s |\n| %9d Categoria %27s | %-10s |\n",
                 destination, c.category(), "", distance);
-            default -> String.format("| Meta volante: %-25s | %-10s |\n", destination, distance);
+            default -> String.format("| Meta volante: %-33s | %-10s |\n", destination, distance);
         };
     }
 
     public String stringifyTop(Map<Integer, Participant> participants) {
         return IntStream.range(0, 3).boxed()
-            .map(i -> String.format("| %d. %-29s %s %d puntos |\n", 
+            .map(i -> String.format("| %d. %-34s %s %6d puntos |\n", 
                 i+1, participants.get(top.get(i)), times.get(top.get(i)), points()[i]))
             .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
             .toString();
@@ -87,10 +87,10 @@ public abstract class Race {
     public String toString(Map<Integer, Participant> participants, Rankings ranking) {
         return headerString()
             + Utils.separator
-            + String.format("| Puntuación: %40s |\n", "")
+            + String.format("| %-60s |\n", "Puntuación:")
             + stringifyTop(participants)
             + Utils.blank
-            + String.format("| Clasificación: %37s |\n", "")
+            + String.format("| %-60s |\n", "Clasificación:")
             + ranking.toString(this, participants)
             + Utils.separator;
     }

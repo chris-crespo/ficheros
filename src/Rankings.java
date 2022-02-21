@@ -51,7 +51,7 @@ public record Rankings(Map<Integer, Integer> bonusSprint, Map<Integer, Integer> 
             .map(i -> {
                 var entryKey = sortedEntries.get(i).getKey();
                 return String.format(
-                    "| %d. %-40s %d puntos |\n", 
+                    "| %2d. %-45s %3d puntos |\n", 
                     i+1, 
                     participants.get(entryKey).toStringWithTeam(),
                     ranking.get(entryKey));
@@ -78,7 +78,7 @@ public record Rankings(Map<Integer, Integer> bonusSprint, Map<Integer, Integer> 
             .map(i -> {
                 var entry = sortedEntries.get(i);
                 var participant = participants.get(entry.getKey());
-                return String.format("| %2d. %-39s %3d puntos |\n",
+                return String.format("| %2d. %-45s %3d puntos |\n",
                     i+1, participant.toStringWithTeam(), entry.getValue());
             })
             .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
@@ -86,10 +86,10 @@ public record Rankings(Map<Integer, Integer> bonusSprint, Map<Integer, Integer> 
     }
 
     public String stringifyBoth(Map<Integer, Participant> participants) {
-        return String.format("| METAS VOLANTES: %36s |\n", " ")
+        return String.format("| %-60s |\n", "METAS VOLANTES:")
             + stringifyRanking(bonusSprint, participants)
             + Utils.separator
-            + String.format("| MONTAÑA: %43s |\n", " ")
+            + String.format("| %-60s |\n", "MONTAÑA:")
             + stringifyRanking(climb, participants);
     }
 }
