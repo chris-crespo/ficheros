@@ -64,11 +64,7 @@ public record Stage(StageHeader header, Map<Integer, Time> startTimes, List<Race
     private String stringifyRaces(Map<Integer, Participant> participants, List<Rankings> rankings) {
         return IntStream.range(0, races.size() - 1)
             .boxed()
-            .map(i -> {
-                var x = races.get(i).toString(participants, rankings.get(i));
-                System.out.println(x);
-                return x;
-            })
+            .map(i -> races.get(i).toString(participants, rankings.get(i)))
             .reduce((acc, str) -> acc + str)
             .orElse("");
     }
